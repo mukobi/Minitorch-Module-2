@@ -37,6 +37,15 @@ def test_layout_bad():
 
 
 @pytest.mark.task2_1
+def test_indices_custom():
+    "Test indices custom."
+    tensor_data = minitorch.TensorData([0] * 2 * 5, (5, 2))
+    for ind in tensor_data.indices():
+        for i, p in enumerate(ind):
+            assert p >= 0 and p < tensor_data.shape[i]
+            print(ind)
+
+@pytest.mark.task2_1
 @given(tensor_data())
 def test_enumeration(tensor_data):
     "Test enumeration of tensor_datas."
