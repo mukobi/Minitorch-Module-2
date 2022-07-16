@@ -190,7 +190,8 @@ class History:
         Returns:
             list of numbers : a derivative with respect to `inputs`
         """
-        raise NotImplementedError('Need to include this file from past assignment.')
+        # TODO: Implement for Task 1.4.
+        return self.last_fn.backward(self.ctx, d_output)
 
 
 class FunctionBase:
@@ -272,7 +273,16 @@ class FunctionBase:
         """
         # Tip: Note when implementing this function that
         # cls.backward may return either a value or a tuple.
-        raise NotImplementedError('Need to include this file from past assignment.')
+        # TODO: Implement for Task 1.3.
+        derivatives = cls.backward(ctx, d_output)
+
+        outputs = []
+        for i, input in enumerate(inputs):
+            if not is_constant(input):
+                # Ignore constants and constant Variables
+                outputs.append((input, derivatives[i]))
+
+        return outputs
 
 
 # Algorithms for backpropagation
@@ -293,10 +303,30 @@ def topological_sort(variable):
         list of Variables : Non-constant Variables in topological order
                             starting from the right.
     """
-    raise NotImplementedError('Need to include this file from past assignment.')
+    # TODO: Implement for Task 1.4.
+    visited = set()
+    output = []
+
+    def visit(variable):
+        if is_constant(variable) or variable.unique_id in visited:
+            return
+
+        if variable.history is not None and variable.history.inputs is not None:
+            for input in variable.history.inputs:
+                visit(input)
+
+        visited.add(variable.unique_id)
+        output.append(variable)
+
+    visit(variable)
+
+    # Reverse the sorted order
+    output = output[::-1]
+
+    return output
 
 
-def backpropagate(variable, deriv):
+def backpropagate(final_variable, deriv):
     """
     Runs backpropagation on the computation graph in order to
     compute derivatives for the leave nodes.
@@ -309,4 +339,31 @@ def backpropagate(variable, deriv):
 
     No return. Should write to its results to the derivative values of each leaf through `accumulate_derivative`.
     """
-    raise NotImplementedError('Need to include this file from past assignment.')
+    # TODO: Implement for Task 1.4.
+    # Call topological sort to get an ordered queue
+    queue = topological_sort(final_variable)
+
+    # Create a dictionary of Variables and current derivatives
+    vars_to_derivs = {final_variable.unique_id: deriv}
+
+    # For each node in backward order, pull a completed Variable and derivative from the queue:
+    variable: Variable
+    for variable in queue:
+        derivative = vars_to_derivs[variable.unique_id]
+
+        # if the Variable is a leaf, add its final derivative (accumulate_derivative) and loop to (1)
+        if variable.history is None or variable.history.last_fn is None:
+            variable.accumulate_derivative(derivative)
+
+        # if the Variable is not a leaf
+        else:
+            # call .backprop_step on the last function that created it with derivative as dout
+            derivatives = wrap_tuple(variable.history.backprop_step(derivative))
+
+            # loop through all the Variables+derivative produced by the chain rule
+            for input, input_deriv in zip(variable.history.inputs, derivatives):
+                if isinstance(input, Variable):
+                    # accumulate derivatives for the Variable in a dictionary (check .unique_id)
+                    if input.unique_id not in vars_to_derivs.keys():
+                        vars_to_derivs[input.unique_id] = 0.0
+                    vars_to_derivs[input.unique_id] += input_deriv
