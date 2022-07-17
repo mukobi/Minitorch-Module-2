@@ -45,6 +45,7 @@ def test_indices_custom():
             assert p >= 0 and p < tensor_data.shape[i]
             print(ind)
 
+
 @pytest.mark.task2_1
 @given(tensor_data())
 def test_enumeration(tensor_data):
