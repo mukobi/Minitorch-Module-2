@@ -116,7 +116,7 @@ def tensor_zip(fn):
 
     Args:
         fn: function mapping two floats to float to apply
-        out (array): storage for `out` tensor
+        out_storage (array): storage for `out` tensor
         out_shape (array): shape for `out` tensor
         out_strides (array): strides for `out` tensor
         a_storage (array): storage for `a` tensor
@@ -131,7 +131,7 @@ def tensor_zip(fn):
     """
 
     def _zip(
-        out,
+        out_storage,
         out_shape,
         out_strides,
         a_storage,
@@ -142,7 +142,21 @@ def tensor_zip(fn):
         b_strides,
     ):
         # TODO: Implement for Task 2.3.
-        raise NotImplementedError("Need to implement for Task 2.3")
+        for out_ordinal in range(len(out_storage)):
+            # Get the index of a particular output
+            out_index = [0] * len(out_shape)
+            to_index(out_ordinal, out_shape, out_index)
+
+            # Broadcast that index to the index in each input
+            a_index = [0] * len(a_shape)
+            b_index = [0] * len(b_shape)
+            broadcast_index(out_index, out_shape, a_shape, a_index)
+            broadcast_index(out_index, out_shape, b_shape, b_index)
+
+            # Apply the function to the inputs at that space and store it in the output
+            a_ordinal = index_to_position(a_index, a_strides)
+            b_ordinal = index_to_position(b_index, b_strides)
+            out_storage[out_ordinal] = fn(a_storage[a_ordinal], b_storage[b_ordinal])
 
     return _zip
 
