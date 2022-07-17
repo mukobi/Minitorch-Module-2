@@ -27,7 +27,7 @@ def tensor_map(fn):
 
     Args:
         fn: function from float-to-float to apply
-        out (array): storage for out tensor
+        out_storage (array): storage for out tensor
         out_shape (array): shape for out tensor
         out_strides (array): strides for out tensor
         in_storage (array): storage for in tensor
@@ -38,9 +38,20 @@ def tensor_map(fn):
         None : Fills in `out`
     """
 
-    def _map(out, out_shape, out_strides, in_storage, in_shape, in_strides):
-        # TODO: Implement for Task 2.2.
-        raise NotImplementedError("Need to implement for Task 2.2")
+    def _map(out_storage, out_shape, out_strides, in_storage, in_shape, in_strides):
+        # TODO: Implement for Task 2.3.
+        for out_ordinal in range(len(out_storage)):
+            # Get the index of a particular output
+            out_index = [0] * len(out_shape)
+            to_index(out_ordinal, out_shape, out_index)
+
+            # Broadcast that index to the index in the input
+            in_index = [0] * len(in_shape)
+            broadcast_index(out_index, out_shape, in_shape, in_index)
+
+            # Apply the function to the input at that space and store it in the output
+            in_ordinal = index_to_position(in_index, in_strides)
+            out_storage[out_ordinal] = fn(in_storage[in_ordinal])
 
     return _map
 
@@ -130,8 +141,8 @@ def tensor_zip(fn):
         b_shape,
         b_strides,
     ):
-        # TODO: Implement for Task 2.2.
-        raise NotImplementedError("Need to implement for Task 2.2")
+        # TODO: Implement for Task 2.3.
+        raise NotImplementedError("Need to implement for Task 2.3")
 
     return _zip
 
@@ -201,8 +212,8 @@ def tensor_reduce(fn):
     """
 
     def _reduce(out, out_shape, out_strides, a_storage, a_shape, a_strides, reduce_dim):
-        # TODO: Implement for Task 2.2.
-        raise NotImplementedError("Need to implement for Task 2.2")
+        # TODO: Implement for Task 2.3.
+        raise NotImplementedError("Need to implement for Task 2.3")
 
     return _reduce
 
