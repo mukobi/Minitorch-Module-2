@@ -120,7 +120,7 @@ def make_tensor_backend(tensor_ops, is_cuda=False):
                 a = ctx.saved_values
                 sig = sigmoid_map(a)
                 # d(sigmoid) = sigmoid(1 - sigmoid)
-                return mul_zip(sig, add_zip(tensor(1), neg_map(sig)))
+                return mul_zip(grad_output, mul_zip(sig, add_zip(tensor(1), neg_map(sig))))
 
         class ReLU(Function):
             @staticmethod
