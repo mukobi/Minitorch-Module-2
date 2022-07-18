@@ -191,7 +191,20 @@ class History:
             list of numbers : a derivative with respect to `inputs`
         """
         # TODO: Implement for Task 1.4.
-        return self.last_fn.backward(self.ctx, d_output)
+        items = self.last_fn.chain_rule(self.ctx, self.inputs, d_output)
+        result = []
+        curr = 0
+        for input_var in self.inputs:
+            if is_constant(input_var):
+                result.append(0.0)
+                continue
+            var, number = items[curr]
+            assert var == input_var
+            result.append(number)
+            curr += 1
+        assert len(result) == len(self.inputs)
+
+        return tuple(result)
 
 
 class FunctionBase:
@@ -274,13 +287,15 @@ class FunctionBase:
         # Tip: Note when implementing this function that
         # cls.backward may return either a value or a tuple.
         # TODO: Implement for Task 1.3.
-        derivatives = cls.backward(ctx, d_output)
+        derivatives = wrap_tuple(cls.backward(ctx, d_output))
 
         outputs = []
-        for i, input in enumerate(inputs):
+        for input, derivative in zip(inputs, derivatives):
+            # Ignore constants and constant Variables
             if not is_constant(input):
-                # Ignore constants and constant Variables
-                outputs.append((input, derivatives[i]))
+                # Make sure output of backward is the same size as input of forward
+                derivative = input.expand(derivative)
+                outputs.append((input, derivative))
 
         return outputs
 
