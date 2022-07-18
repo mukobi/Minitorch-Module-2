@@ -228,13 +228,14 @@ def make_tensor_backend(tensor_ops, is_cuda=False):
             def forward(ctx, a, order):
                 # TODO: Implement for Task 2.3.
                 ctx.save_for_backward(order)
-                return a.permute(order)
+                return a._new(a._tensor.permute(*order))
 
             @staticmethod
             def backward(ctx, grad_output):
                 # TODO: Implement for Task 2.4.
                 order = ctx.saved_values
-                return grad_output.permute(order)
+                reverse_order = [order.index(i) for i in range(len(order))]
+                return grad_output._new(grad_output._tensor.permute(*reverse_order))
 
         class View(Function):
             @staticmethod
