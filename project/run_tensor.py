@@ -22,10 +22,10 @@ class Network(minitorch.Module):
 
     def forward(self, x):
         # TODO: Implement for Task 2.5.
-        x1 = self.layer1(x).relu()
-        x2 = self.layer2(x1).relu()
-        x3 = self.layer3(x2).sigmoid()
-        return x3
+        x = self.layer1(x).relu()
+        x = self.layer2(x).relu()
+        x = self.layer3(x).sigmoid()
+        return x
 
 
 class Linear(minitorch.Module):
